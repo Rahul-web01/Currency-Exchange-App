@@ -9,7 +9,7 @@ A React-based currency converter application that allows users to input an amoun
 # demo 
 <img src='https://images.pexels.com/photos/3532540/pexels-photo-3532540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'/>
 # Installation
- <b> git clone <b> https://github.com/yourusername/currency-converter.git
+ <b> git clone <b> https://github.com/Rahul-web01/currency-converter.git
   cd currency-converter</b>
 # Project Structure
  currency-converter/
