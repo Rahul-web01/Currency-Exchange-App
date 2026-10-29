@@ -4,6 +4,7 @@ import TrendChart from "./components/TrendChart";
 import GuillocheBackground from "./components/GuillocheBackground";
 import useCurrencyInfo from "./hooks/useCurrencyInfo";
 import useRateHistory from "./hooks/useRateHistory";
+import { cleanAmount, formatMoney, inWords, plainNumber } from "./utils/format";
 
 const REFRESH_MS = 60000;
 const TREND_DAYS = 30;
@@ -56,15 +57,14 @@ function App() {
 
   const rate = rates[to];
   const numeric = parseFloat(amount);
-  const converted =
-    rate && Number.isFinite(numeric)
-      ? (numeric * rate).toLocaleString(undefined, { maximumFractionDigits: 4 })
-      : "";
+  const result = rate && Number.isFinite(numeric) ? numeric * rate : NaN;
+  const tooLarge = numeric === Infinity;
+  const converted = Number.isFinite(result) ? formatMoney(result, to) : tooLarge ? "Number too large" : "";
 
   const swap = () => {
     setFrom(to);
     setTo(from);
-    if (converted) setAmount(String(parseFloat((numeric * rate).toFixed(4))));
+    if (Number.isFinite(result)) setAmount(plainNumber(result));
   };
 
   const updatedText = lastUpdated
@@ -90,7 +90,8 @@ function App() {
               <InputBox
                 label="You send"
                 amount={amount}
-                onAmountChange={setAmount}
+                onAmountChange={(v) => setAmount(cleanAmount(v))}
+                hint={Number.isFinite(numeric) && amount !== "" ? [formatMoney(numeric, from), inWords(numeric, from)].filter(Boolean).join(" · ") : ""}
                 currency={from}
                 currencyOptions={list}
                 onCurrencyChange={setFrom}
@@ -113,7 +114,8 @@ function App() {
                 currency={to}
                 currencyOptions={list}
                 onCurrencyChange={setTo}
-                amountDisabled
+                readOnly
+                hint={inWords(result, to)}
                 names={names}
               />
             </div>

@@ -7,7 +7,8 @@ function InputBox({
   currency,
   currencyOptions,
   onCurrencyChange,
-  amountDisabled = false,
+  readOnly = false,
+  hint = "",
   names = {},
 }) {
   const amountId = useId();
@@ -36,18 +37,21 @@ function InputBox({
           ))}
         </select>
       </div>
+      {/* type="text" so formatted values (1,00,000) and very large amounts work */}
       <input
         id={amountId}
-        type="number"
+        type="text"
         inputMode="decimal"
-        min="0"
-        step="any"
+        autoComplete="off"
         value={amount}
-        disabled={amountDisabled}
+        readOnly={readOnly}
         placeholder="0"
         onChange={(e) => onAmountChange && onAmountChange(e.target.value)}
-        className="num mt-2 w-full bg-transparent text-4xl font-semibold tracking-tight outline-none placeholder:text-ink/25 focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8 sm:text-5xl"
+        className="num mt-2 w-full bg-transparent text-3xl font-semibold tracking-tight outline-none placeholder:text-ink/25 focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8 sm:text-5xl"
       />
+      <p className="num mt-1 min-h-[1.25rem] text-sm text-ink/60" aria-live="polite">
+        {hint}
+      </p>
     </div>
   );
 }
