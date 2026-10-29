@@ -1,77 +1,59 @@
 <div align="center">
 
-  # 💱 Real-Time Currency Converter
-  
-  <h3><b>A Fast & Responsive Currency Exchange Application</b></h3>
+# Live Currency Converter v2
 
-  <p>
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" />
-    <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
-    <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" />
-  </p>
+**Convert at live market rates, with a 30-day trend chart.**
 
-  <p>
-    <a href="https://real-time-currencyconverter.vercel.app/" target="_blank">
-      <img src="https://img.shields.io/badge/View_Live_Demo-FF5722?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
-    </a>
-    <a href="https://github.com/Rahul-web01/currency-converter/issues">
-      <img src="https://img.shields.io/badge/Report_Bug-red?style=for-the-badge" alt="Bug Report" />
-    </a>
-  </p>
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+
 </div>
 
----
+## What's new in v2
 
-## 📖 Project Overview
+- **Live market rates** that auto-refresh every 60 seconds, with a countdown and a "Refresh now" button.
+- **30-day trend chart** for the selected pair, with percent change, low and high.
+- **160+ currencies** with full names, loaded from the API.
+- **Banknote-inspired design**: guilloche rosette background, deep teal ink and gold foil accent.
+- **Remembers your last pair** and offers one-click common pairs.
+- **Accessible**: labelled inputs, visible keyboard focus, live-region rate announcements, reduced-motion support.
+- **Resilient**: request cancellation on change, clear error message, automatic retry on the next refresh.
 
-**Currency Converter** is a modern React application that allows users to perform real-time currency exchanges. By leveraging custom hooks and API integration, the app provides accurate rates instantly. 
+## Data sources
 
-The UI is built with **Tailwind CSS**, ensuring a sleek, mobile-responsive experience that mimics professional financial tools.
+| Purpose | Source | Key needed |
+| :--- | :--- | :--- |
+| Live rates | open.er-api.com | No |
+| 30-day history | frankfurter.app (ECB data) | No |
 
-### 🌟 Why this project?
-This project demonstrates proficiency in:
-* **API Integration:** Fetching live data from external endpoints.
-* **React Hooks:** Creating custom hooks (`useCurrencyInfo`) for logic separation.
-* **State Management:** Handling complex state for currency swapping and calculations.
+History covers about 30 major currencies. For other pairs the chart says it's unavailable and conversion still works.
 
----
+For true intraday or tick data, swap the URL and parsing in `src/hooks/useCurrencyInfo.js` for a paid provider (for example Twelve Data or Alpha Vantage) and keep the API key in a Vercel environment variable.
 
-## 📸 Application Demo
-
-<div align="center"> 
-  <img width="100%" alt="Currency Converter Interface" src="https://github.com/user-attachments/assets/2c87e6f5-fa6d-4ea5-9a1d-2cf57155148f" />
-</div>
-
----
-
-## ✨ Key Features
-
-| Feature | Description |
-| :--- | :--- |
-| 🚀 **Live Conversion** | Fetches the latest exchange rates instantly via API. |
-| 🔄 **Smart Swap** | "Flip" button to instantly reverse source and target currencies. |
-| 📱 **Responsive UI** | Beautifully styled with Tailwind CSS for all device sizes. |
-| 🧩 **Modular Components** | Clean code architecture using reusable `InputBox` components. |
-| ⚡ **Optimized Performance** | Uses `useCallback` and `useEffect` for efficient rendering. |
-
----
-
-## 📂 Project Structure
-
-A clean folder structure ensuring scalability and maintainability.
+## Project structure
 
 ```text
-currency-converter/
-│
-├── public/                 # Static assets
-├── src/
-│   ├── components/
-│   │   └── InputBox.jsx    # Reusable UI component for input fields
-│   ├── hooks/
-│   │   └── useCurrencyInfo.js  # Custom hook to fetch API data
-│   ├── App.jsx             # Main application logic
-│   ├── main.jsx            # Entry point
-│   └── index.css           # Tailwind directives
-├── package.json            # Dependencies
-└── README.md               # Documentation
+src/
+├── components/
+│   ├── InputBox.jsx             # Amount + currency field
+│   ├── TrendChart.jsx           # SVG line chart
+│   └── GuillocheBackground.jsx  # Banknote-style background
+├── hooks/
+│   ├── useCurrencyInfo.js       # Live rates + polling
+│   └── useRateHistory.js        # 30-day history
+├── App.jsx
+├── main.jsx
+└── index.css
+```
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+## Deploy
+
+Push to GitHub and import the repo in Vercel. No environment variables are needed for the default data sources.

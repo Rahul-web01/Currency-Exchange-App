@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: "Familjen Grotesk", system-ui, sans-serif;
+    background: #0d2a2e;
+  }
+  body {
+    margin: 0;
+    background: #0d2a2e;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* hide number spinners, the amount is large display type */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+}

@@ -1,90 +1,192 @@
-import { useState } from 'react'
-import { InputBox } from './components'
-import useCurrencyInfo from './hooks/UseCurrencyInfo'
+import { useEffect, useMemo, useState } from "react";
+import InputBox from "./components/InputBox";
+import TrendChart from "./components/TrendChart";
+import GuillocheBackground from "./components/GuillocheBackground";
+import useCurrencyInfo from "./hooks/useCurrencyInfo";
+import useRateHistory from "./hooks/useRateHistory";
+
+const REFRESH_MS = 60000;
+const TREND_DAYS = 30;
+const QUICK_PAIRS = [
+  ["USD", "INR"],
+  ["EUR", "USD"],
+  ["GBP", "INR"],
+  ["USD", "JPY"],
+  ["AED", "INR"],
+];
+
+const load = (key, fallback) => {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch {
+    return fallback;
+  }
+};
+const save = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable, ignore */
+  }
+};
 
 function App() {
+  const [amount, setAmount] = useState("100");
+  const [from, setFrom] = useState(() => load("cc_from", "USD"));
+  const [to, setTo] = useState(() => load("cc_to", "INR"));
 
-  const [amount, setAmount] = useState(0)
-  const [from, setFrom] = useState("usd")
-  const [to, setTo] = useState("inr")
-  const [convertedAmount, setConvertedAmount] = useState(0)
+  const { rates, lastUpdated, loading, error, refresh, nextRefreshIn } =
+    useCurrencyInfo(from, REFRESH_MS);
+  const { points, status } = useRateHistory(from, to, TREND_DAYS);
 
-  const currencyInfo = useCurrencyInfo(from)
-  const options = Object.keys(currencyInfo)
+  useEffect(() => save("cc_from", from), [from]);
+  useEffect(() => save("cc_to", to), [to]);
+
+  const options = useMemo(() => Object.keys(rates).sort(), [rates]);
+  const list = options.length ? options : [from, to];
+
+  const names = useMemo(() => {
+    try {
+      const dn = new Intl.DisplayNames(["en"], { type: "currency" });
+      return Object.fromEntries(list.map((c) => [c, dn.of(c)]));
+    } catch {
+      return {};
+    }
+  }, [list]);
+
+  const rate = rates[to];
+  const numeric = parseFloat(amount);
+  const converted =
+    rate && Number.isFinite(numeric)
+      ? (numeric * rate).toLocaleString(undefined, { maximumFractionDigits: 4 })
+      : "";
 
   const swap = () => {
-    setFrom(to)
-    setTo(from)
-    setConvertedAmount(amount)
-    setAmount(convertedAmount)
-  }
+    setFrom(to);
+    setTo(from);
+    if (converted) setAmount(String(parseFloat((numeric * rate).toFixed(4))));
+  };
 
-  const convert = () => {
-    setConvertedAmount(amount * currencyInfo[to])
-  }
+  const updatedText = lastUpdated
+    ? lastUpdated.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    : "—";
 
   return (
-    <div
-      className="w-full h-screen flex justify-center items-center bg-cover bg-no-repeat bg-slate-700"
-      style={{
-        backgroundImage: `url('https://images.pexels.com/photos/3532540/pexels-photo-3532540.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')`,
-      }}
-    >
-        
-      <div className="w-full px-4">
-        <div className="w-full max-w-4xl mx-auto border border-gray-200 rounded-2xl p-10 backdrop-blur-md bg-teal-500/30 shadow-2xl">
-          
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              convert()
-            }}
-          >
-            <div className="w-full mb-4">
+    <>
+      <GuillocheBackground />
+      <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-8 sm:py-16">
+        <header className="max-w-xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-paper sm:text-5xl">
+            Convert at today's market rate
+          </h1>
+          <p className="mt-3 text-paper/70">
+            Rates refresh every minute. Pick two currencies, type an amount, and see what it's worth right now.
+          </p>
+        </header>
+
+        <div className="grid gap-6 lg:grid-cols-5">
+          <section className="lg:col-span-3" aria-label="Converter">
+            <div className="rounded-3xl border border-paper/10 bg-ink2/80 p-3 shadow-2xl backdrop-blur sm:p-4">
               <InputBox
-                label="From"
+                label="You send"
                 amount={amount}
-                currencyOptions={options}
-                onCurrencyChange={(currency) => setFrom(currency)}
-                selectCurrency={from}
-                onAmountChange={(amount) => setAmount(amount)}
+                onAmountChange={setAmount}
+                currency={from}
+                currencyOptions={list}
+                onCurrencyChange={setFrom}
+                names={names}
               />
-            </div>
 
-            <div className="relative w-full h-1 my-6">
-              <button
-                type="button"
-                className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white rounded-lg bg-red-700 text-white px-4 py-2 text-lg font-semibold shadow-lg hover:bg-red-800 transition"
-                onClick={swap}
-              >
-                SWAP
-              </button>
-            </div>
+              <div className="relative z-10 -my-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={swap}
+                  className="rounded-full border-4 border-ink2 bg-foil px-5 py-2 text-sm font-semibold text-ink hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper"
+                >
+                  Swap currencies
+                </button>
+              </div>
 
-            <div className="w-full mt-4 mb-6">
               <InputBox
-                label="To"
-                amount={convertedAmount}
-                currencyOptions={options}
-                onCurrencyChange={(currency) => setTo(currency)}
-                selectCurrency={to}
-                amountDisable
+                label="They receive"
+                amount={converted}
+                currency={to}
+                currencyOptions={list}
+                onCurrencyChange={setTo}
+                amountDisabled
+                names={names}
               />
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-red-700 text-white px-6 py-4 text-lg rounded-xl font-semibold shadow-lg hover:bg-red-800 transition"
-            >
-              Convert {from.toUpperCase()} to {to.toUpperCase()}
-            </button>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-paper/75">
+              <p className="num" aria-live="polite">
+                {rate ? `1 ${from} = ${rate.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${to}` : "Loading rate…"}
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="num">
+                  Updated {updatedText} · next in {nextRefreshIn}s
+                </span>
+                <button
+                  type="button"
+                  onClick={refresh}
+                  disabled={loading}
+                  className="rounded-lg border border-paper/25 px-3 py-1.5 font-medium text-paper hover:bg-paper/10 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-foil"
+                >
+                  {loading ? "Refreshing…" : "Refresh now"}
+                </button>
+              </div>
+            </div>
 
-          </form>
+            {error && (
+              <p role="alert" className="mt-3 rounded-lg bg-down/20 px-4 py-2 text-sm text-paper">
+                {error}
+              </p>
+            )}
 
+            <div className="mt-6">
+              <p className="mb-2 text-sm text-paper/60">Common pairs</p>
+              <div className="flex flex-wrap gap-2">
+                {QUICK_PAIRS.map(([a, b]) => {
+                  const active = a === from && b === to;
+                  return (
+                    <button
+                      key={a + b}
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => {
+                        setFrom(a);
+                        setTo(b);
+                      }}
+                      className={`rounded-full border px-4 py-1.5 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-foil ${
+                        active
+                          ? "border-foil bg-foil text-ink"
+                          : "border-paper/25 text-paper hover:bg-paper/10"
+                      }`}
+                    >
+                      {a} to {b}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <section
+            className="rounded-3xl border border-paper/10 bg-ink2/80 p-5 backdrop-blur sm:p-6 lg:col-span-2"
+            aria-label="Rate trend"
+          >
+            <h2 className="mb-4 text-lg font-semibold text-paper">How the rate has moved</h2>
+            <TrendChart points={points} status={status} from={from} to={to} days={TREND_DAYS} />
+          </section>
         </div>
-      </div>
-    </div>
-  )
+
+        <footer className="mt-auto text-xs text-paper/50">
+          Live rates from open.er-api.com. Trend data from the European Central Bank via frankfurter.app. Rates are
+          mid-market and for information only.
+        </footer>
+      </main>
+    </>
+  );
 }
 
-export default App
+export default App;
