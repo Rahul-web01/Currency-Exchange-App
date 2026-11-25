@@ -4,7 +4,7 @@
 
 **Convert between 160+ currencies at live market rates, with a 30-day trend chart for the selected pair.**
 
-### [Live demo →](https://currency-exchange-dackf2w6x-rahuls-projects-98687e81.vercel.app/)
+### [Live demo →](https://currency-exchange-app-rahuls-projects-98687e81.vercel.app/)
 
 ![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite_5-646CFF?style=for-the-badge&logo=vite&logoColor=white)
