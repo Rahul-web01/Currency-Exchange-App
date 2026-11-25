@@ -42,7 +42,7 @@ flowchart LR
     A --> L[useCurrencyInfo<br/>polls every 60 s]
     A --> H[useRateHistory<br/>last 30 days]
     L --> E[open.er-api.com<br/>latest rates]
-    H --> F[api.frankfurter.app<br/>ECB daily rates]
+    H --> F[api.frankfurter.dev<br/>ECB daily rates]
     L --> C[Converted amount<br/>and rate line]
     H --> T[TrendChart SVG]
 ```
@@ -50,7 +50,7 @@ flowchart LR
 - [`src/hooks/useCurrencyInfo.js`](src/hooks/useCurrencyInfo.js) fetches all rates for the base currency from
   `https://open.er-api.com/v6/latest/{BASE}`, re-polls on an interval and cancels stale requests with `AbortController`.
 - [`src/hooks/useRateHistory.js`](src/hooks/useRateHistory.js) fetches daily rates for the pair from the
-  [Frankfurter](https://www.frankfurter.app) API (European Central Bank data) for the last 30 days.
+  [Frankfurter](https://frankfurter.dev) API (European Central Bank data) for the last 30 days.
 - [`src/components/TrendChart.jsx`](src/components/TrendChart.jsx) turns those points into an SVG path, with no chart library.
 - [`src/utils/format.js`](src/utils/format.js) handles input cleaning, locale-aware formatting and lakh/crore wording.
 
@@ -59,7 +59,7 @@ flowchart LR
 | Purpose | Source | Coverage | Key needed |
 | :--- | :--- | :--- | :--- |
 | Live rates | [ExchangeRate-API open access](https://www.exchangerate-api.com/docs/free) (`open.er-api.com`) | 160+ currencies | No |
-| 30-day history | [Frankfurter](https://www.frankfurter.app) (European Central Bank data) | About 30 major currencies | No |
+| 30-day history | [Frankfurter](https://frankfurter.dev) (European Central Bank data) | About 30 major currencies | No |
 
 Rates are mid-market and for information only.
 
