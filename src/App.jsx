@@ -183,7 +183,7 @@ function App() {
         </div>
 
         <footer className="mt-auto text-xs text-paper/50">
-          Live rates from open.er-api.com. Trend data from the European Central Bank via frankfurter.app. Rates are
+          Live rates from open.er-api.com. Trend data from the European Central Bank via frankfurter.dev. Rates are
           mid-market and for information only.
         </footer>
       </main>

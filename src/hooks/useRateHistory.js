@@ -19,7 +19,7 @@ export default function useRateHistory(from, to, days = 30) {
     const end = new Date();
     const start = new Date(Date.now() - days * 864e5);
     fetch(
-      `https://api.frankfurter.app/${fmt(start)}..${fmt(end)}?from=${from}&to=${to}`,
+      `https://api.frankfurter.dev/v1/${fmt(start)}..${fmt(end)}?from=${from}&to=${to}`,
       { signal: controller.signal }
     )
       .then((r) => {
